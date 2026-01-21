@@ -38,3 +38,23 @@ function loadPhotos() {
 }
 
 window.onload = loadPhotos;
+function addWish() {
+  const name = document.getElementById("name").value.trim();
+  const wish = document.getElementById("wish").value.trim();
+
+  if (!name || !wish) {
+    alert("Συμπλήρωσε όνομα και ευχή 💕");
+    return;
+  }
+
+  const wishesDiv = document.getElementById("wishes");
+
+  const wishEl = document.createElement("div");
+  wishEl.className = "wish";
+  wishEl.innerHTML = `<strong>${name}</strong><br>${wish}`;
+
+  wishesDiv.prepend(wishEl);
+
+  document.getElementById("name").value = "";
+  document.getElementById("wish").value = "";
+}
