@@ -1,0 +1,65 @@
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(180deg, #e7b2b2, #f5d6d6);
+  margin: 0;
+  padding: 20px;
+  text-align: center;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.65);
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 25px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+h1, h2 {
+  color: #7b2c2c; /* σάπιο μήλο */
+}
+
+p {
+  color: #5a2a2a;
+}
+
+input, textarea {
+  width: 100%;
+  border: none;
+  border-radius: 15px;
+  padding: 15px;
+  margin: 10px 0;
+  font-size: 16px;
+}
+
+textarea {
+  height: 120px;
+  resize: none;
+}
+
+button {
+  background: linear-gradient(90deg, #a04545, #c26b6b);
+  color: white;
+  border: none;
+  padding: 15px 25px;
+  border-radius: 25px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+#wishes div {
+  background: white;
+  border-radius: 15px;
+  padding: 12px;
+  margin: 10px 0;
+  text-align: left;
+}
+
+footer {
+  margin-top: 30px;
+  font-size: 14px;
+  color: #7b2c2c;
+}
