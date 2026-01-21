@@ -4,24 +4,30 @@ const storage = firebase.storage();
 /* ================== ΦΩΤΟ ================== */
 function uploadPhoto() {
   const input = document.getElementById("photoInput");
-  const file = input.files[0];
+  const files = input.files;
 
-  if (!file) {
-    alert("Διάλεξε πρώτα μια φωτογραφία ή βίντεο 🙂");
+  if (!files.length) {
+    alert("Διάλεξε τουλάχιστον ένα αρχείο 🙂");
     return;
   }
 
-  const storageRef = storage.ref("uploads/" + Date.now() + "_" + file.name);
+  if (files.length > 10) {
+    alert("Μπορείς να ανεβάσεις έως 10 αρχεία συνολικά 📸🎥");
+    return;
+  }
 
-  storageRef.put(file)
-    .then(() => {
-      alert("Το αρχείο ανέβηκε επιτυχώς ❤️");
-      input.value = "";
-      loadPhotos();
-    })
-    .catch(error => {
-      alert("Σφάλμα: " + error.message);
-    });
+  Array.from(files).forEach(file => {
+    const filePath = "uploads/" + Date.now() + "_" + file.name;
+    const storageRef = storage.ref(filePath);
+
+    storageRef.put(file)
+      .catch(error => {
+        console.error("Σφάλμα:", error);
+      });
+  });
+
+  alert("Τα αρχεία ανεβαίνουν ❤️");
+  input.value = "";
 }
 
 function loadPhotos() {
