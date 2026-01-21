@@ -84,3 +84,16 @@ textarea,
 button {
   width: 100%;
 }
+
+button {
+  position: relative;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+input,
+textarea {
+  position: relative;
+  z-index: 10;
+  pointer-events: auto;
+}
