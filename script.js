@@ -1,6 +1,7 @@
 const db = firebase.firestore();
 const storage = firebase.storage();
 
+/* ================== ΦΩΤΟ ================== */
 function uploadPhoto() {
   const input = document.getElementById("photoInput");
   const file = input.files[0];
@@ -10,24 +11,26 @@ function uploadPhoto() {
     return;
   }
 
-  const storageRef = storage.ref("uploads/" + file.name);
+  const storageRef = storage.ref("uploads/" + Date.now() + "_" + file.name);
 
   storageRef.put(file)
     .then(() => {
       alert("Το αρχείο ανέβηκε επιτυχώς ❤️");
       input.value = "";
+      loadPhotos();
     })
-    .catch((error) => {
+    .catch(error => {
       alert("Σφάλμα: " + error.message);
     });
 }
+
 function loadPhotos() {
   const gallery = document.getElementById("gallery");
-  const listRef = storage.ref("uploads");
+  gallery.innerHTML = "";
 
-  listRef.listAll().then(res => {
-    res.items.forEach(itemRef => {
-      itemRef.getDownloadURL().then(url => {
+  storage.ref("uploads").listAll().then(res => {
+    res.items.forEach(item => {
+      item.getDownloadURL().then(url => {
         const img = document.createElement("img");
         img.src = url;
         img.style.width = "100%";
@@ -38,9 +41,7 @@ function loadPhotos() {
   });
 }
 
-window.onload = loadPhotos;
-const db = firebase.firestore();
-
+/* ================== ΕΥΧΕΣ ================== */
 function addWish() {
   const name = document.getElementById("name").value.trim();
   const wish = document.getElementById("wish").value.trim();
@@ -51,22 +52,17 @@ function addWish() {
   }
 
   db.collection("wishes").add({
-    name: name,
-    wish: wish,
+    name,
+    wish,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  })
-  .then(() => {
+  }).then(() => {
     document.getElementById("name").value = "";
     document.getElementById("wish").value = "";
-  })
-  .catch(error => {
-    alert("Σφάλμα αποθήκευσης 😢");
-    console.error(error);
   });
 }
+
 function loadWishes() {
   const wishesDiv = document.getElementById("wishes");
-  wishesDiv.innerHTML = "";
 
   db.collection("wishes")
     .orderBy("createdAt", "desc")
@@ -82,4 +78,8 @@ function loadWishes() {
     });
 }
 
-window.onload = loadWishes;
+/* ================== LOAD ================== */
+window.onload = () => {
+  loadPhotos();
+  loadWishes();
+};
