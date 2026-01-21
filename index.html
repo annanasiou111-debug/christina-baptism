@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>H Βάπτιση της Χριστίνας</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+</head>
+
+<body>
+
+  <section class="card">
+    <h1>Βιβλίο Ευχών</h1>
+    <p>Αφήστε μια γλυκιά ευχή για τη Χριστίνα 💕</p>
+
+    <input type="text" id="name" placeholder="Το όνομά σας">
+    <textarea id="wish" placeholder="Η ευχή σας..."></textarea>
+
+    <button onclick="addWish()">Αποστολή Ευχής</button>
+  </section>
+
+  <section class="card">
+    <h2>Ευχές</h2>
+    <div id="wishes"></div>
+  </section>
+
+  <section class="card">
+    <h2>Φωτογραφίες & Βίντεο</h2>
+    <p>Ανεβάστε τις στιγμές της βάπτισης 📸</p>
+
+    <input type="file" id="photoInput" accept="image/*,video/*">
+    <button onclick="uploadPhoto()">Ανέβασμα</button>
+  </section>
+
+  <footer>
+    Με αγάπη για τη Χριστίνα 💗
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
