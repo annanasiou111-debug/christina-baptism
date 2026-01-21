@@ -1,3 +1,4 @@
+const db = firebase.firestore();
 const storage = firebase.storage();
 
 function uploadPhoto() {
