@@ -43,35 +43,42 @@ const db = firebase.firestore();
 
 function addWish() {
   const name = document.getElementById("name").value.trim();
-  const text = document.getElementById("wish").value.trim();
+  const wish = document.getElementById("wish").value.trim();
 
-  if (!text) {
-    alert("Γράψε μια ευχή 💕");
+  if (!name || !wish) {
+    alert("Συμπλήρωσε όνομα και ευχή 💕");
     return;
   }
 
   db.collection("wishes").add({
-    name: name || "Ανώνυμος",
-    text: text,
+    name: name,
+    wish: wish,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  })
+  .then(() => {
+    document.getElementById("name").value = "";
+    document.getElementById("wish").value = "";
+  })
+  .catch(err => {
+    alert("Σφάλμα: " + err.message);
   });
-
-  document.getElementById("name").value = "";
-  document.getElementById("wish").value = "";
 }
-db.collection("wishes")
-  .orderBy("createdAt", "desc")
-  .onSnapshot(snapshot => {
-    const container = document.getElementById("wishes");
-    container.innerHTML = "";
+function loadWishes() {
+  const wishesDiv = document.getElementById("wishes");
+  wishesDiv.innerHTML = "";
 
-    snapshot.forEach(doc => {
-      const data = doc.data();
-
-      const div = document.createElement("div");
-      div.className = "wish";
-      div.innerHTML = `<strong>${data.name}</strong><br>${data.text}`;
-
-      container.appendChild(div);
+  db.collection("wishes")
+    .orderBy("createdAt", "desc")
+    .onSnapshot(snapshot => {
+      wishesDiv.innerHTML = "";
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const div = document.createElement("div");
+        div.className = "wish";
+        div.innerHTML = `<strong>${data.name}</strong><br>${data.wish}`;
+        wishesDiv.appendChild(div);
+      });
     });
-  });
+}
+
+window.onload = loadWishes;
