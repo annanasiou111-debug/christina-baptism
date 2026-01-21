@@ -46,7 +46,7 @@ function addWish() {
   const wish = document.getElementById("wish").value.trim();
 
   if (!name || !wish) {
-    alert("Συμπλήρωσε όνομα και ευχή 💕");
+    alert("Συμπλήρωσε όνομα και ευχή 💗");
     return;
   }
 
@@ -59,8 +59,9 @@ function addWish() {
     document.getElementById("name").value = "";
     document.getElementById("wish").value = "";
   })
-  .catch(err => {
-    alert("Σφάλμα: " + err.message);
+  .catch(error => {
+    alert("Σφάλμα αποθήκευσης 😢");
+    console.error(error);
   });
 }
 function loadWishes() {
