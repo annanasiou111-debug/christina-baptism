@@ -34,14 +34,27 @@ function loadPhotos() {
   const gallery = document.getElementById("gallery");
   gallery.innerHTML = "";
 
-  storage.ref("uploads").listAll().then(res => {
-    res.items.forEach(item => {
-      item.getDownloadURL().then(url => {
-        const img = document.createElement("img");
-        img.src = url;
-        img.style.width = "100%";
-        img.style.marginBottom = "10px";
-        gallery.appendChild(img);
+  const listRef = storage.ref("uploads");
+
+  listRef.listAll().then(res => {
+    res.items.forEach(itemRef => {
+      itemRef.getDownloadURL().then(url => {
+
+        if (itemRef.name.match(/\.(mp4|webm|mov)$/i)) {
+          const video = document.createElement("video");
+          video.src = url;
+          video.controls = true;
+          video.style.width = "100%";
+          video.style.marginBottom = "10px";
+          gallery.appendChild(video);
+        } else {
+          const img = document.createElement("img");
+          img.src = url;
+          img.style.width = "100%";
+          img.style.marginBottom = "10px";
+          gallery.appendChild(img);
+        }
+
       });
     });
   });
