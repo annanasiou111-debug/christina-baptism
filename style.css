@@ -63,3 +63,24 @@ footer {
   font-size: 14px;
   color: #7b2c2c;
 }
+/* FIX ΓΙΑ ΚΙΝΗΤΑ – να μην ξεφεύγουν τα πλαίσια */
+body {
+  overflow-x: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.card,
+form,
+section {
+  width: 100%;
+  max-width: 100%;
+}
+
+input,
+textarea,
+button {
+  width: 100%;
+}
