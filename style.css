@@ -104,3 +104,51 @@ textarea {
   border-radius: 8px;
   font-size: 14px;
 }
+.wish {
+  background: linear-gradient(135deg, #fff, #fff7f9);
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  border-radius: 18px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  animation: fadeIn 0.4s ease;
+  border-left: 5px solid #e91e63;
+}
+
+.wish strong {
+  color: #e91e63;
+  font-size: 15px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.gallery {
+  columns: 2;
+  column-gap: 12px;
+}
+
+@media (min-width: 768px) {
+  .gallery {
+    columns: 3;
+  }
+}
+
+.gallery img {
+  width: 100%;
+  border-radius: 18px;
+  margin-bottom: 12px;
+  break-inside: avoid;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  transition: transform 0.3s ease;
+}
+
+.gallery img:hover {
+  transform: scale(1.04);
+}
