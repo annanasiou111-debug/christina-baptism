@@ -20,3 +20,21 @@ function uploadPhoto() {
       alert("Σφάλμα: " + error.message);
     });
 }
+function loadPhotos() {
+  const gallery = document.getElementById("gallery");
+  const listRef = storage.ref("uploads");
+
+  listRef.listAll().then(res => {
+    res.items.forEach(itemRef => {
+      itemRef.getDownloadURL().then(url => {
+        const img = document.createElement("img");
+        img.src = url;
+        img.style.width = "100%";
+        img.style.marginBottom = "10px";
+        gallery.appendChild(img);
+      });
+    });
+  });
+}
+
+window.onload = loadPhotos;
