@@ -39,23 +39,39 @@ function loadPhotos() {
 }
 
 window.onload = loadPhotos;
+const db = firebase.firestore();
+
 function addWish() {
   const name = document.getElementById("name").value.trim();
-  const wish = document.getElementById("wish").value.trim();
+  const text = document.getElementById("wish").value.trim();
 
-  if (!name || !wish) {
-    alert("Συμπλήρωσε όνομα και ευχή 💕");
+  if (!text) {
+    alert("Γράψε μια ευχή 💕");
     return;
   }
 
-  const wishesDiv = document.getElementById("wishes");
-
-  const wishEl = document.createElement("div");
-  wishEl.className = "wish";
-  wishEl.innerHTML = `<strong>${name}</strong><br>${wish}`;
-
-  wishesDiv.prepend(wishEl);
+  db.collection("wishes").add({
+    name: name || "Ανώνυμος",
+    text: text,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
 
   document.getElementById("name").value = "";
   document.getElementById("wish").value = "";
 }
+db.collection("wishes")
+  .orderBy("createdAt", "desc")
+  .onSnapshot(snapshot => {
+    const container = document.getElementById("wishes");
+    container.innerHTML = "";
+
+    snapshot.forEach(doc => {
+      const data = doc.data();
+
+      const div = document.createElement("div");
+      div.className = "wish";
+      div.innerHTML = `<strong>${data.name}</strong><br>${data.text}`;
+
+      container.appendChild(div);
+    });
+  });
