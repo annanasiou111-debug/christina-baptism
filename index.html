@@ -53,27 +53,4 @@ firebase.initializeApp(firebaseConfig);
 
   <script src="script.js"></script>
 </body>
-  <script>
-  const storage = firebase.storage();
-
-  function uploadPhoto() {
-    const fileInput = document.getElementById("photo");
-    const file = fileInput.files[0];
-
-    if (!file) {
-      alert("Διάλεξε πρώτα μια φωτογραφία 😊");
-      return;
-    }
-
-    const storageRef = storage.ref("photos/" + Date.now() + "_" + file.name);
-    storageRef.put(file)
-      .then(() => {
-        alert("Η φωτογραφία ανέβηκε 🎉");
-        fileInput.value = "";
-      })
-      .catch(err => {
-        alert("Σφάλμα: " + err.message);
-      });
-  }
-</script>
 </html>
