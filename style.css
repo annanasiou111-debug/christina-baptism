@@ -149,3 +149,7 @@ textarea {
 .gallery video:hover {
   transform: scale(1.05);
 }
+.card {
+  max-width: 500px;
+  margin: 0 auto 25px auto;
+}
