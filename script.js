@@ -97,8 +97,7 @@ function loadWishes() {
     });
 }
 
-/* ================== LOAD ================== */
-window.onload = () => {
+window.addEventListener("load", () => {
   loadPhotos();
   loadWishes();
-};
+});
