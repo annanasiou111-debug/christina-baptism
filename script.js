@@ -2,7 +2,7 @@
 const db = firebase.firestore();
 const storage = firebase.storage();
 
-alert("JS φορτώθηκε σωστά");
+alert("ΤΩΡΑ ΦΟΡΤΩΝΩ");
 
 /* =======================
    ΕΥΧΕΣ
