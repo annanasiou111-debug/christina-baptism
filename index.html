@@ -1,61 +1,99 @@
-<!DOCTYPE html>
-<html lang="el">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>H Βάπτιση της Χριστίνας</title>
+const db = firebase.firestore();
+const storage = firebase.storage();
 
-  <link rel="stylesheet" href="style.css">
+/* ---------- ΕΥΧΕΣ ---------- */
 
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
- <script>
-  const firebaseConfig = {
-  apiKey: "AIzaSyDJRdK_Erx0oWN2kJLVfbwrN-xHJ8saTcQ",
-  authDomain: "christina-baptism-752bb.firebaseapp.com",
-  projectId: "christina-baptism-752bb",
-  storageBucket: "christina-baptism-752bb.appspot.com",
-  messagingSenderId: "1002255831082",
-  appId: "1:1002255831082:web:f0a52618f9f65337cd3353"
-};
-firebase.initializeApp(firebaseConfig);  
-</script>
-</head>
+function addWish() {
+  const name = document.getElementById("name").value.trim();
+  const wish = document.getElementById("wish").value.trim();
 
-<body>
+  if (!name || !wish) {
+    alert("Συμπλήρωσε όνομα και ευχή 💗");
+    return;
+  }
 
-  <section class="card">
-    <h1>Βιβλίο Ευχών</h1>
-    <p>Αφήστε μια γλυκιά ευχή για τη Χριστίνα 💕</p>
+  db.collection("wishes").add({
+    name,
+    wish,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(() => {
+    document.getElementById("name").value = "";
+    document.getElementById("wish").value = "";
+  }).catch(err => {
+    alert("Σφάλμα αποθήκευσης");
+    console.error(err);
+  });
+}
 
-    <input type="text" id="name" placeholder="Το όνομά σας">
-    <textarea id="wish" placeholder="Η ευχή σας..."></textarea>
+function loadWishes() {
+  const wishesDiv = document.getElementById("wishes");
 
-    <button onclick="addWish()">Αποστολή Ευχής</button>
-  </section>
+  db.collection("wishes")
+    .orderBy("createdAt", "desc")
+    .onSnapshot(snapshot => {
+      wishesDiv.innerHTML = "";
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        const div = document.createElement("div");
+        div.className = "wish";
+        div.innerHTML = `<strong>${d.name}</strong><br>${d.wish}`;
+        wishesDiv.appendChild(div);
+      });
+    });
+}
 
-  <section class="card">
-    <h2>Ευχές</h2>
-    <div id="wishes"></div>
-  </section>
+/* ---------- ΦΩΤΟ / ΒΙΝΤΕΟ ---------- */
 
-  <section class="card">
-    <h2>Φωτογραφίες & Βίντεο</h2>
-    <p>Ανεβάστε τις στιγμές της βάπτισης 📸</p>
+function uploadPhoto() {
+  const input = document.getElementById("photoInput");
+  const files = input.files;
 
- <input type="file" id="photoInput" accept="image/*,video/*" multiple>
-    <button onclick="uploadPhoto()">Ανέβασμα</button>
-  </section>
-  <section class="card">
-  <h2>📷 Οι φωτογραφίες μας</h2>
-  <div id="gallery" class="gallery"></div>
-</section>
+  if (!files.length) {
+    alert("Διάλεξε αρχεία 🙂");
+    return;
+  }
 
-  <footer>
-    Με αγάπη για τη Χριστίνα 💗
-  </footer>
+  if (files.length > 10) {
+    alert("Έως 10 αρχεία επιτρέπονται");
+    return;
+  }
 
-  <script src="script.js"></script>
-</body>
-</html>
+  Array.from(files).forEach(file => {
+    const ref = storage.ref("uploads/" + Date.now() + "_" + file.name);
+    ref.put(file).catch(err => alert(err.message));
+  });
+
+  input.value = "";
+}
+
+function loadPhotos() {
+  const gallery = document.getElementById("gallery");
+  gallery.innerHTML = "";
+
+  storage.ref("uploads").listAll().then(res => {
+    res.items.forEach(item => {
+      item.getDownloadURL().then(url => {
+        const el = document.createElement(
+          url.includes(".mp4") ? "video" : "img"
+        );
+
+        el.src = url;
+        el.style.width = "100%";
+        el.style.marginBottom = "10px";
+
+        if (el.tagName === "VIDEO") {
+          el.controls = true;
+        }
+
+        gallery.appendChild(el);
+      });
+    });
+  });
+}
+
+/* ---------- LOAD ---------- */
+
+window.addEventListener("load", () => {
+  loadWishes();
+  loadPhotos();
+});
