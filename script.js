@@ -132,3 +132,29 @@ window.addEventListener("load", () => {
   loadWishes();
   loadPhotos();
 });
+// =======================
+// LOAD GALLERY (με σειρά)
+// =======================
+db.collection("media")
+  .orderBy("createdAt", "asc")
+  .onSnapshot((snapshot) => {
+    const gallery = document.getElementById("gallery");
+    gallery.innerHTML = ""; // καθαρίζει πριν ξαναφορτώσει
+
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+
+      if (data.type === "image") {
+        const img = document.createElement("img");
+        img.src = data.url;
+        gallery.appendChild(img);
+      }
+
+      if (data.type === "video") {
+        const video = document.createElement("video");
+        video.src = data.url;
+        video.controls = true;
+        gallery.appendChild(video);
+      }
+    });
+  });
