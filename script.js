@@ -1,6 +1,8 @@
-// Firebase references
+// 🔥 Firebase init references
 const db = firebase.firestore();
 const storage = firebase.storage();
+
+alert("JS φορτώθηκε σωστά");
 
 /* =======================
    ΕΥΧΕΣ
