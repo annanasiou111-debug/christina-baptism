@@ -1,18 +1,18 @@
-// 🔥 Firebase init references
+// ===============================
+// FIREBASE INIT REFERENCES
+// ===============================
 const db = firebase.firestore();
 const storage = firebase.storage();
 
-alert("ΤΩΡΑ ΦΟΡΤΩΝΩ");
-
-/* =======================
-   ΕΥΧΕΣ
-======================= */
+// ===============================
+// ΕΥΧΕΣ
+// ===============================
 function addWish() {
   const name = document.getElementById("name").value.trim();
   const wish = document.getElementById("wish").value.trim();
 
   if (!name || !wish) {
-    alert("Συμπλήρωσε όνομα και ευχή 💕");
+    alert("Συμπλήρωσε όνομα και ευχή 💗");
     return;
   }
 
@@ -20,11 +20,13 @@ function addWish() {
     name: name,
     wish: wish,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  }).then(() => {
+  })
+  .then(() => {
     document.getElementById("name").value = "";
     document.getElementById("wish").value = "";
-  }).catch(err => {
-    alert("Σφάλμα ευχής");
+  })
+  .catch(err => {
+    alert("Σφάλμα αποθήκευσης ευχής");
     console.error(err);
   });
 }
@@ -46,53 +48,63 @@ function loadWishes() {
     });
 }
 
-/* =======================
-   UPLOAD ΦΩΤΟ / ΒΙΝΤΕΟ
-======================= */
+// ===============================
+// UPLOAD ΦΩΤΟ & ΒΙΝΤΕΟ
+// ===============================
 async function uploadPhoto() {
   const input = document.getElementById("photoInput");
   const files = input.files;
 
   if (!files || files.length === 0) {
-    alert("Διάλεξε αρχεία 🙂");
+    alert("Δεν επέλεξες αρχεία 🙂");
     return;
   }
 
   if (files.length > 10) {
-    alert("Έως 10 αρχεία επιτρέπονται");
+    alert("Μέχρι 10 αρχεία επιτρέπονται 📸🎥");
     return;
   }
 
+  alert("Ξεκινάει το ανέβασμα… ⏳");
+
   for (let file of files) {
+    if (
+      !file.type.startsWith("image/") &&
+      !file.type.startsWith("video/")
+    ) {
+      continue;
+    }
+
     const fileName = Date.now() + "_" + file.name;
-    const ref = storage.ref("uploads/" + fileName);
+    const fileRef = storage.ref("uploads/" + fileName);
 
     try {
-      const snap = await ref.put(file);
-      const url = await snap.ref.getDownloadURL();
+      const snapshot = await fileRef.put(file);
+      const url = await snapshot.ref.getDownloadURL();
       addToGallery(url, file.type);
-    } catch (e) {
-      alert("Σφάλμα στο ανέβασμα");
-      console.error(e);
+    } catch (err) {
+      alert("Σφάλμα στο upload ❌");
+      console.error(err);
     }
   }
 
   input.value = "";
+  alert("Ολοκληρώθηκε το ανέβασμα ❤️");
 }
 
-/* =======================
-   GALLERY
-======================= */
+// ===============================
+// GALLERY
+// ===============================
 function addToGallery(url, type) {
   const gallery = document.getElementById("gallery");
 
-  if (type.startsWith("image")) {
+  if (type.startsWith("image/")) {
     const img = document.createElement("img");
     img.src = url;
     gallery.prepend(img);
   }
 
-  if (type.startsWith("video")) {
+  if (type.startsWith("video/")) {
     const video = document.createElement("video");
     video.src = url;
     video.controls = true;
@@ -100,24 +112,32 @@ function addToGallery(url, type) {
   }
 }
 
-function loadGallery() {
+function loadPhotos() {
   const gallery = document.getElementById("gallery");
   gallery.innerHTML = "";
 
   storage.ref("uploads").listAll().then(res => {
     res.items.forEach(item => {
       item.getDownloadURL().then(url => {
-        const isVideo = item.name.match(/\.(mp4|mov|webm)$/i);
-        addToGallery(url, isVideo ? "video" : "image");
+        if (item.name.match(/\.(mp4|mov|webm)$/i)) {
+          const video = document.createElement("video");
+          video.src = url;
+          video.controls = true;
+          gallery.appendChild(video);
+        } else {
+          const img = document.createElement("img");
+          img.src = url;
+          gallery.appendChild(img);
+        }
       });
     });
   });
 }
 
-/* =======================
-   INIT
-======================= */
-window.onload = () => {
+// ===============================
+// LOAD EVERYTHING
+// ===============================
+window.addEventListener("load", () => {
   loadWishes();
-  loadGallery();
-};
+  loadPhotos();
+});
