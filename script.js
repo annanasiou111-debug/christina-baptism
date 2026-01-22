@@ -61,35 +61,31 @@ async function uploadPhoto() {
   }
 
   if (files.length > 10) {
-    alert("Μέχρι 10 αρχεία επιτρέπονται 📸🎥");
+    alert("Έως 10 αρχεία επιτρέπονται");
     return;
   }
 
-  alert("Ξεκινάει το ανέβασμα… ⏳");
-
   for (let file of files) {
-    if (
-      !file.type.startsWith("image/") &&
-      !file.type.startsWith("video/")
-    ) {
-      continue;
-    }
-
     const fileName = Date.now() + "_" + file.name;
-    const fileRef = storage.ref("uploads/" + fileName);
+    const storageRef = storage.ref("uploads/" + fileName);
 
-    try {
-      const snapshot = await fileRef.put(file);
-      const url = await snapshot.ref.getDownloadURL();
-      addToGallery(url, file.type);
-    } catch (err) {
-      alert("Σφάλμα στο upload ❌");
-      console.error(err);
-    }
+    const uploadTask = storageRef.put(file);
+
+    uploadTask.on(
+      "state_changed",
+      null,
+      (error) => {
+        alert("Σφάλμα στο ανέβασμα");
+        console.error(error);
+      },
+      async () => {
+        const url = await uploadTask.snapshot.ref.getDownloadURL();
+        addToGallery(url, file.type);
+      }
+    );
   }
 
   input.value = "";
-  alert("Ολοκληρώθηκε το ανέβασμα ❤️");
 }
 
 // ===============================
