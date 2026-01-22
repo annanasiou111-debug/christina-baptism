@@ -1,6 +1,8 @@
 const db = firebase.firestore();
+const storage = firebase.storage();
 
-/* ================== ΦΩΤΟ ================== */
+/* ================== ΦΩΤΟ & ΒΙΝΤΕΟ ================== */
+
 function uploadPhoto() {
   const input = document.getElementById("photoInput");
   const files = input.files;
@@ -16,15 +18,13 @@ function uploadPhoto() {
   }
 
   Array.from(files).forEach(file => {
-    const fileRef = storage.ref("uploads/" + Date.now() + "_" + file.name);
+    const ref = storage.ref(
+      "uploads/" + Date.now() + "_" + file.name
+    );
 
-    fileRef.put(file)
-      .then(() => {
-        console.log("Ανέβηκε:", file.name);
-      })
-      .catch(err => {
-        alert("Σφάλμα: " + err.message);
-      });
+    ref.put(file).catch(err => {
+      alert("Σφάλμα: " + err.message);
+    });
   });
 
   input.value = "";
@@ -34,33 +34,37 @@ function loadPhotos() {
   const gallery = document.getElementById("gallery");
   gallery.innerHTML = "";
 
-  const listRef = storage.ref("uploads");
+  storage.ref("uploads").listAll().then(res => {
+    res.items.forEach(item => {
+      item.getDownloadURL().then(url => {
 
-  listRef.listAll().then(res => {
-    res.items.forEach(itemRef => {
-      itemRef.getDownloadURL().then(url => {
+        let el;
 
-        if (itemRef.name.match(/\.(mp4|webm|mov)$/i)) {
-          const video = document.createElement("video");
-          video.src = url;
-          video.controls = true;
-          video.style.width = "100%";
-          video.style.marginBottom = "10px";
-          gallery.appendChild(video);
+        if (item.name.match(/\.(mp4|webm|mov)$/i)) {
+          el = document.createElement("video");
+          el.controls = true;
         } else {
-          const img = document.createElement("img");
-          img.src = url;
-          img.style.width = "100%";
-          img.style.marginBottom = "10px";
-          gallery.appendChild(img);
+          el = document.createElement("img");
         }
 
+        el.src = url;
+        el.style.width = "100%";
+        el.style.borderRadius = "12px";
+        el.style.marginBottom = "10px";
+        el.style.cursor = "pointer";
+
+        el.onclick = () => {
+          window.open(url, "_blank");
+        };
+
+        gallery.appendChild(el);
       });
     });
   });
 }
 
 /* ================== ΕΥΧΕΣ ================== */
+
 function addWish() {
   const name = document.getElementById("name").value.trim();
   const wish = document.getElementById("wish").value.trim();
@@ -87,15 +91,18 @@ function loadWishes() {
     .orderBy("createdAt", "desc")
     .onSnapshot(snapshot => {
       wishesDiv.innerHTML = "";
+
       snapshot.forEach(doc => {
-        const data = doc.data();
+        const d = doc.data();
         const div = document.createElement("div");
         div.className = "wish";
-        div.innerHTML = `<strong>${data.name}</strong><br>${data.wish}`;
+        div.innerHTML = `<strong>${d.name}</strong><br>${d.wish}`;
         wishesDiv.appendChild(div);
       });
     });
 }
+
+/* ================== LOAD ================== */
 
 window.addEventListener("load", () => {
   loadPhotos();
