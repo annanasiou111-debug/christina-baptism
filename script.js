@@ -1,105 +1,63 @@
-// Firebase refs
+// Firebase references
 const db = firebase.firestore();
 const storage = firebase.storage();
 
-/* ================== ΕΥΧΕΣ ================== */
-
-function addWish() {
-  const name = document.getElementById("name").value.trim();
-  const wish = document.getElementById("wish").value.trim();
-
-  if (!name || !wish) {
-    alert("Συμπλήρωσε όνομα και ευχή 💕");
-    return;
-  }
-
-  db.collection("wishes").add({
-    name,
-    wish,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  }).then(() => {
-    document.getElementById("name").value = "";
-    document.getElementById("wish").value = "";
-    loadWishes();
-  }).catch(err => alert(err.message));
-}
-
-function loadWishes() {
-  const wishesDiv = document.getElementById("wishes");
-  wishesDiv.innerHTML = "";
-
-  db.collection("wishes")
-    .orderBy("createdAt", "desc")
-    .onSnapshot(snapshot => {
-      wishesDiv.innerHTML = "";
-      snapshot.forEach(doc => {
-        const d = doc.data();
-        const div = document.createElement("div");
-        div.className = "wish";
-        div.innerHTML = `<strong>${d.name}</strong><br>${d.wish}`;
-        wishesDiv.appendChild(div);
-      });
-    });
-}
-
-/* ================== UPLOAD ================== */
-
-function uploadPhoto() {
+// =======================
+// UPLOAD ΦΩΤΟ / ΒΙΝΤΕΟ
+// =======================
+async function uploadPhoto() {
   const input = document.getElementById("photoInput");
   const files = input.files;
 
-  if (!files.length) {
-    alert("Διάλεξε αρχεία 🙂");
+  if (!files || files.length === 0) {
+    alert("Δεν επέλεξες αρχεία 🙂");
     return;
   }
 
   if (files.length > 10) {
-    alert("Έως 10 αρχεία επιτρέπονται");
+    alert("Μπορείς να ανεβάσεις έως 10 αρχεία.");
     return;
   }
 
-  Array.from(files).forEach(file => {
-    const ref = storage.ref("uploads/" + Date.now() + "_" + file.name);
+  for (let file of files) {
+    const fileType = file.type;
 
-    ref.put(file)
-      .then(() => loadPhotos())
-      .catch(err => alert(err.message));
-  });
+    if (!fileType.startsWith("image/") && !fileType.startsWith("video/")) {
+      continue;
+    }
 
-  input.value = "";
+    const fileName = Date.now() + "_" + file.name;
+    const storageRef = storage.ref("uploads/" + fileName);
+
+    try {
+      const snapshot = await storageRef.put(file);
+      const url = await snapshot.ref.getDownloadURL();
+      addToGallery(url, fileType);
+    } catch (err) {
+      console.error("Σφάλμα upload:", err);
+      alert("Κάτι πήγε στραβά με το upload");
+    }
+  }
+
+  input.value = ""; // καθαρίζει το input
 }
 
-/* ================== GALLERY ================== */
-
-function loadPhotos() {
+// =======================
+// GALLERY
+// =======================
+function addToGallery(url, type) {
   const gallery = document.getElementById("gallery");
-  gallery.innerHTML = "";
 
-  storage.ref("uploads").listAll().then(res => {
-    res.items.forEach(item => {
-      item.getDownloadURL().then(url => {
-        let el;
+  if (type.startsWith("image/")) {
+    const img = document.createElement("img");
+    img.src = url;
+    gallery.prepend(img);
+  }
 
-        if (url.includes(".mp4") || url.includes(".webm")) {
-          el = document.createElement("video");
-          el.controls = true;
-        } else {
-          el = document.createElement("img");
-        }
-
-        el.src = url;
-        el.style.width = "100%";
-        el.style.marginBottom = "10px";
-
-        gallery.appendChild(el);
-      });
-    });
-  });
+  if (type.startsWith("video/")) {
+    const video = document.createElement("video");
+    video.src = url;
+    video.controls = true;
+    gallery.prepend(video);
+  }
 }
-
-/* ================== LOAD ================== */
-
-window.addEventListener("load", () => {
-  loadWishes();
-  loadPhotos();
-});
