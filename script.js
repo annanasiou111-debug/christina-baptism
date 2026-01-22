@@ -1,5 +1,5 @@
 // ===============================
-// FIREBASE INIT REFERENCES
+// FIREBASE REFERENCES
 // ===============================
 const db = firebase.firestore();
 const storage = firebase.storage();
@@ -49,112 +49,94 @@ function loadWishes() {
 }
 
 // ===============================
-// UPLOAD ΦΩΤΟ & ΒΙΝΤΕΟ
+// UPLOAD ΦΩΤΟ & ΒΙΝΤΕΟ (έως 10)
 // ===============================
 async function uploadPhoto() {
   const input = document.getElementById("photoInput");
   const files = Array.from(input.files);
 
-  if (!files.length) {
+  if (files.length === 0) {
     alert("Δεν επέλεξες αρχεία 🙂");
     return;
   }
 
   if (files.length > 10) {
-    alert("Έως 10 αρχεία επιτρέπονται 📸🎥");
+    alert("Μπορείς να ανεβάσεις έως 10 αρχεία 📸🎥");
     return;
   }
 
   alert("Ξεκινάει το ανέβασμα...");
 
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    const fileName = `${Date.now()}_${i}_${file.name}`;
-    const ref = firebase.storage().ref("uploads/" + fileName);
-    await ref.put(file);
-  }
+  try {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
 
-  input.value = "";
-  alert("Ολοκληρώθηκε το ανέβασμα ❤️");
+      if (
+        !file.type.startsWith("image/") &&
+        !file.type.startsWith("video/")
+      ) {
+        continue;
+      }
+
+      // timestamp για ΣΤΑΘΕΡΗ ΣΕΙΡΑ
+      const fileName = `${Date.now()}_${i}_${file.name}`;
+      const ref = storage.ref("uploads/" + fileName);
+
+      await ref.put(file);
+    }
+
+    input.value = "";
+    alert("Το ανέβασμα ολοκληρώθηκε ❤️");
+
+    // ξαναφορτώνει τη gallery
+    loadPhotos();
+
+  } catch (err) {
+    console.error(err);
+    alert("Κάτι πήγε στραβά στο ανέβασμα 😢");
+  }
 }
 
 // ===============================
-// GALLERY
+// GALLERY (ΣΤΑΘΕΡΗ ΣΕΙΡΑ)
 // ===============================
-function addToGallery(url, type) {
-  const gallery = document.getElementById("gallery");
-
-  if (type.startsWith("image/")) {
-    const img = document.createElement("img");
-    img.src = url;
-    gallery.prepend(img);
-  }
-
-  if (type.startsWith("video/")) {
-    const video = document.createElement("video");
-    video.src = url;
-    video.controls = true;
-    gallery.prepend(video);
-  }
-}
-
 async function loadPhotos() {
   const gallery = document.getElementById("gallery");
   gallery.innerHTML = "";
 
-  const listRef = firebase.storage().ref("uploads");
-  const res = await listRef.listAll();
+  try {
+    const listRef = storage.ref("uploads");
+    const res = await listRef.listAll();
 
-  // Ταξινόμηση με βάση το όνομα (χρονική σειρά)
-  const sortedItems = res.items.sort((a, b) =>
-    a.name.localeCompare(b.name)
-  );
+    // Σειρά βάσει ονόματος (timestamp)
+    const sortedItems = res.items.sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
 
-  for (const itemRef of sortedItems) {
-    const url = await itemRef.getDownloadURL();
+    for (const itemRef of sortedItems) {
+      const url = await itemRef.getDownloadURL();
 
-    if (itemRef.name.match(/\.(mp4|mov|webm)$/i)) {
-      const video = document.createElement("video");
-      video.src = url;
-      video.controls = true;
-      gallery.appendChild(video);
-    } else {
-      const img = document.createElement("img");
-      img.src = url;
-      gallery.appendChild(img);
+      if (itemRef.name.match(/\.(mp4|mov|webm)$/i)) {
+        const video = document.createElement("video");
+        video.src = url;
+        video.controls = true;
+        gallery.appendChild(video);
+      } else {
+        const img = document.createElement("img");
+        img.src = url;
+        gallery.appendChild(img);
+      }
     }
+
+  } catch (err) {
+    console.error("Σφάλμα φόρτωσης gallery:", err);
   }
 }
+
 // ===============================
-// LOAD EVERYTHING
+// LOAD ΣΕΛΙΔΑΣ
 // ===============================
 window.addEventListener("load", () => {
   loadWishes();
   loadPhotos();
 });
-// =======================
-// LOAD GALLERY (με σειρά)
-// =======================
-db.collection("media")
-  .orderBy("createdAt", "asc")
-  .onSnapshot((snapshot) => {
-    const gallery = document.getElementById("gallery");
-    gallery.innerHTML = ""; // καθαρίζει πριν ξαναφορτώσει
-
-    snapshot.forEach((doc) => {
-      const data = doc.data();
-
-      if (data.type === "image") {
-        const img = document.createElement("img");
-        img.src = data.url;
-        gallery.appendChild(img);
-      }
-
-      if (data.type === "video") {
-        const video = document.createElement("video");
-        video.src = data.url;
-        video.controls = true;
-        gallery.appendChild(video);
-      }
-    });
-  });
