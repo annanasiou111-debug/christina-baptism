@@ -51,50 +51,48 @@ function loadWishes() {
 // ===============================
 // UPLOAD ΦΩΤΟ & ΒΙΝΤΕΟ (έως 10)
 // ===============================
-async function uploadPhoto() {
+function uploadPhoto() {
   const input = document.getElementById("photoInput");
   const files = Array.from(input.files);
 
-  if (files.length === 0) {
+  if (!files.length) {
     alert("Δεν επέλεξες αρχεία 🙂");
     return;
   }
 
   if (files.length > 10) {
-    alert("Μπορείς να ανεβάσεις έως 10 αρχεία 📸🎥");
+    alert("Έως 10 αρχεία επιτρέπονται 📸🎥");
     return;
   }
 
   alert("Ξεκινάει το ανέβασμα...");
 
-  try {
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+  let completed = 0;
 
-      if (
-        !file.type.startsWith("image/") &&
-        !file.type.startsWith("video/")
-      ) {
-        continue;
+  files.forEach((file, index) => {
+    const fileName = Date.now() + "_" + index + "_" + file.name;
+    const ref = firebase.storage().ref("uploads/" + fileName);
+
+    const uploadTask = ref.put(file);
+
+    uploadTask.on(
+      "state_changed",
+      null,
+      (error) => {
+        alert("Σφάλμα στο ανέβασμα");
+        console.error(error);
+      },
+      () => {
+        completed++;
+
+        if (completed === files.length) {
+          alert("Ολοκληρώθηκε το ανέβασμα ❤️");
+          input.value = "";
+          loadPhotos(); // 🔥 φορτώνει αμέσως στη σελίδα
+        }
       }
-
-      // timestamp για ΣΤΑΘΕΡΗ ΣΕΙΡΑ
-      const fileName = `${Date.now()}_${i}_${file.name}`;
-      const ref = storage.ref("uploads/" + fileName);
-
-      await ref.put(file);
-    }
-
-    input.value = "";
-    alert("Το ανέβασμα ολοκληρώθηκε ❤️");
-
-    // ξαναφορτώνει τη gallery
-    loadPhotos();
-
-  } catch (err) {
-    console.error(err);
-    alert("Κάτι πήγε στραβά στο ανέβασμα 😢");
-  }
+    );
+  });
 }
 
 // ===============================
