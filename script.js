@@ -53,39 +53,29 @@ function loadWishes() {
 // ===============================
 async function uploadPhoto() {
   const input = document.getElementById("photoInput");
-  const files = input.files;
+  const files = Array.from(input.files);
 
-  if (!files || files.length === 0) {
+  if (!files.length) {
     alert("Δεν επέλεξες αρχεία 🙂");
     return;
   }
 
   if (files.length > 10) {
-    alert("Έως 10 αρχεία επιτρέπονται");
+    alert("Έως 10 αρχεία επιτρέπονται 📸🎥");
     return;
   }
 
-  for (let file of files) {
-    const fileName = Date.now() + "_" + file.name;
-    const storageRef = storage.ref("uploads/" + fileName);
+  alert("Ξεκινάει το ανέβασμα...");
 
-    const uploadTask = storageRef.put(file);
-
-    uploadTask.on(
-      "state_changed",
-      null,
-      (error) => {
-        alert("Σφάλμα στο ανέβασμα");
-        console.error(error);
-      },
-      async () => {
-        const url = await uploadTask.snapshot.ref.getDownloadURL();
-        addToGallery(url, file.type);
-      }
-    );
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const fileName = `${Date.now()}_${i}_${file.name}`;
+    const ref = firebase.storage().ref("uploads/" + fileName);
+    await ref.put(file);
   }
 
   input.value = "";
+  alert("Ολοκληρώθηκε το ανέβασμα ❤️");
 }
 
 // ===============================
