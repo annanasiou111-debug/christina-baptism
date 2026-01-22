@@ -98,28 +98,33 @@ function addToGallery(url, type) {
   }
 }
 
-function loadPhotos() {
+async function loadPhotos() {
   const gallery = document.getElementById("gallery");
   gallery.innerHTML = "";
 
-  storage.ref("uploads").listAll().then(res => {
-    res.items.forEach(item => {
-      item.getDownloadURL().then(url => {
-        if (item.name.match(/\.(mp4|mov|webm)$/i)) {
-          const video = document.createElement("video");
-          video.src = url;
-          video.controls = true;
-          gallery.appendChild(video);
-        } else {
-          const img = document.createElement("img");
-          img.src = url;
-          gallery.appendChild(img);
-        }
-      });
-    });
-  });
-}
+  const listRef = firebase.storage().ref("uploads");
+  const res = await listRef.listAll();
 
+  // Ταξινόμηση με βάση το όνομα (χρονική σειρά)
+  const sortedItems = res.items.sort((a, b) =>
+    a.name.localeCompare(b.name)
+  );
+
+  for (const itemRef of sortedItems) {
+    const url = await itemRef.getDownloadURL();
+
+    if (itemRef.name.match(/\.(mp4|mov|webm)$/i)) {
+      const video = document.createElement("video");
+      video.src = url;
+      video.controls = true;
+      gallery.appendChild(video);
+    } else {
+      const img = document.createElement("img");
+      img.src = url;
+      gallery.appendChild(img);
+    }
+  }
+}
 // ===============================
 // LOAD EVERYTHING
 // ===============================
