@@ -1,5 +1,4 @@
 const db = firebase.firestore();
-const storage = firebase.storage();
 
 /* ================== ΦΩΤΟ ================== */
 function uploadPhoto() {
@@ -7,26 +6,27 @@ function uploadPhoto() {
   const files = input.files;
 
   if (!files.length) {
-    alert("Διάλεξε τουλάχιστον ένα αρχείο 🙂");
+    alert("Διάλεξε αρχεία 🙂");
     return;
   }
 
   if (files.length > 10) {
-    alert("Μπορείς να ανεβάσεις έως 10 αρχεία συνολικά 📸🎥");
+    alert("Έως 10 αρχεία επιτρέπονται 📸🎥");
     return;
   }
 
   Array.from(files).forEach(file => {
-    const filePath = "uploads/" + Date.now() + "_" + file.name;
-    const storageRef = storage.ref(filePath);
+    const fileRef = storage.ref("uploads/" + Date.now() + "_" + file.name);
 
-    storageRef.put(file)
-      .catch(error => {
-        console.error("Σφάλμα:", error);
+    fileRef.put(file)
+      .then(() => {
+        console.log("Ανέβηκε:", file.name);
+      })
+      .catch(err => {
+        alert("Σφάλμα: " + err.message);
       });
   });
 
-  alert("Τα αρχεία ανεβαίνουν ❤️");
   input.value = "";
 }
 
